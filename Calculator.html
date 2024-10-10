@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculator</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f4f4f4;
+    }
+    .calculator {
+      max-inline-size: 22rem;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0px 3px 6px 0px rgba(0, 0, 0, 0.15), 0px 2px 4px 0px rgba(0, 0, 0, 0.12);
+      background-color: #fff;
+    }
+    .calculator__output {
+      font-size: 2rem;
+      text-align: end;
+      background: hsl(202, 11%, 29%);
+      color: hsl(255, 100%, 100%);
+      padding-block-start: 0.25rem;
+      padding-block-end: 0.25rem;
+      padding-inline-end: 0.75rem;
+      height: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    .calculator__key {
+      border: 1px solid hsl(208, 24%, 74%); /* Use borders instead of shadows */
+      padding-block-start: 0.5rem;
+      padding-block-end: 0.5rem;
+      padding-inline-start: 1.25rem;
+      padding-inline-end: 1.25rem;
+      font-size: 1.5rem;
+      cursor: pointer;
+      background-color: hsl(0, 0%, 100%); /* Make the buttons white for contrast */
+    }
+    .calculator__key--enter {
+      grid-column: 4 / 5;
+      grid-row: 2 / span 4;
+      background: hsl(357, 100%, 72%);
+      color: white;
+    }
+    .calculator__keys {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-gap: 0;
+    }
+    .calculator__key--operator {
+      background: hsl(208, 25%, 86%);
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="calculator__output" id="output">0</div>
+    <div class="calculator__keys">
+      <button class="calculator__key calculator__key--operator" data-action="add">+</button>
+      <button class="calculator__key calculator__key--operator" data-action="subtract">-</button>
+      <button class="calculator__key calculator__key--operator" data-action="multiply">&times;</button>
+      <button class="calculator__key calculator__key--operator" data-action="divide">÷</button>
+      <button class="calculator__key">7</button>
+      <button class="calculator__key">8</button>
+      <button class="calculator__key">9</button>
+      <button class="calculator__key">4</button>
+      <button class="calculator__key">5</button>
+      <button class="calculator__key">6</button>
+      <button class="calculator__key">1</button>
+      <button class="calculator__key">2</button>
+      <button class="calculator__key">3</button>
+      <button class="calculator__key">0</button>
+      <button class="calculator__key">.</button>
+      <button class="calculator__key" data-action="clear">AC</button>
+      <button class="calculator__key calculator__key--enter" data-action="calculate">=</button>
+    </div>
+  </div>
+
+  <script>
+    const calculator = document.querySelector('.calculator');
+    const keys = calculator.querySelector('.calculator__keys');
+    const display = document.querySelector('#output');
+    let firstValue = '';
+    let operator = '';
+    let secondValue = '';
+    let waitingForSecondValue = false;
+
+    keys.addEventListener('click', e => {
+      if (!e.target.matches('button')) return;
+
+      const key = e.target;
+      const keyValue = key.textContent;
+      const displayValue = display.textContent;
+      const action = key.dataset.action;
+      
+      // Number keys
+      if (!action) {
+        if (waitingForSecondValue) {
+          secondValue += keyValue;
+          display.textContent = `${firstValue} ${operator} ${secondValue}`;
+        } else {
+          firstValue += keyValue;
+          display.textContent = firstValue;
+        }
+      }
+
+      // Clear button
+      if (action === 'clear') {
+        display.textContent = '0';
+        firstValue = '';
+        secondValue = '';
+        operator = '';
+        waitingForSecondValue = false;
+      }
+
+      // Operator keys
+      if (['add', 'subtract', 'multiply', 'divide'].includes(action)) {
+        if (!waitingForSecondValue && firstValue) {
+          operator = keyValue; // Display the operator as it is (e.g. +, -, etc.)
+          waitingForSecondValue = true;
+          display.textContent = `${firstValue} ${operator}`;
+        }
+      }
+
+      // Equal button
+      if (action === 'calculate') {
+        if (firstValue && secondValue && operator) {
+          display.textContent = calculate(firstValue, secondValue, operator);
+          firstValue = display.textContent;
+          secondValue = '';
+          operator = '';
+          waitingForSecondValue = false;
+        }
+      }
+    });
+
+    function calculate(first, second, operator) {
+      const firstNum = parseFloat(first);
+      const secondNum = parseFloat(second);
+      if (operator === '+') return firstNum + secondNum;
+      if (operator === '-') return firstNum - secondNum;
+      if (operator === '×') return firstNum * secondNum;
+      if (operator === '÷') return firstNum / secondNum;
+      return second;
+    }
+  </script>
+</body>
+</html>
